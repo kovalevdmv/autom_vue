@@ -17,7 +17,7 @@ import GeneralFunc from "@/GeneralFunc.js"
 let { props } = defineProps(['props']);
 const toast = inject('toast');
 const ЗакрытьДиалоговоеОкно = inject('ЗакрытьДиалоговоеОкно');
-const МодельОбъекта = defineModel('МодельОбъекта');
+const Данные = defineModel('Данные');
 const emit = defineEmits(['СобытиеПослеЗаполненияМоделиОбъекта','СобытиеПередЗакрытиемДиалога']);
 
 function Закрыть(){
@@ -29,22 +29,22 @@ function Закрыть(){
 }
 
 function Записать() {
-    GeneralFunc.ЗаписатьОбъект(props.ОкноСОбъектом.Объект, МодельОбъекта.value, toast);
+    GeneralFunc.ЗаписатьОбъект(props.ОкноСОбъектом.Объект, Данные.value, toast);
 
     if ('ПодчиненныеТаблицы' in props.ОкноСОбъектом.Объект)
         for (let curChieldTable of props.ОкноСОбъектом.Объект.ПодчиненныеТаблицы)
-            for (let curline of МодельОбъекта.value[curChieldTable.Таблица.Имя])
+            for (let curline of Данные.value[curChieldTable.Таблица.Имя])
                 GeneralFunc.ЗаписатьОбъект(curChieldTable.Таблица, curline, toast);
 }
 
 async function Удалить() {
 
-    if (!МодельОбъекта.value.id)
+    if (!Данные.value.id)
         return;
     const Ответ = await GeneralFunc.remoteCall("РаботаСБазойДанных.ВыполнитьЗапросRPC",
         {
             ТекстЗапроса: `DELETE FROM ${props.ОкноСОбъектом.Объект.ТаблицаБД.Имя} WHERE id = $1`,
-            Параметры: [МодельОбъекта.value.id]
+            Параметры: [Данные.value.id]
         });
 
     if (!Ответ.err)
@@ -61,7 +61,7 @@ async function ОбновитьДанные() {
         const Ответ = await GeneralFunc.remoteCall("РаботаСБазойДанных.ВыполнитьЗапросRPC",
             { ТекстЗапроса: ТекстЗапроса, Параметры: [props.ОкноСОбъектом.id_obj] });
         if (!Ответ.err)
-            МодельОбъекта.value = GeneralFunc.ОбработатьРезультатЗапросаДляОбработкиПолей(props.ОкноСОбъектом.Объект, Ответ.httpResponse.data)[0];
+            Данные.value = GeneralFunc.ОбработатьРезультатЗапросаДляОбработкиПолей(props.ОкноСОбъектом.Объект, Ответ.httpResponse.data)[0];
         else
             toast.add({ severity: 'error', summary: 'Получение данных', detail: Ответ.err, life: 5000 });
 
@@ -76,7 +76,7 @@ async function ОбновитьДанные() {
                 let Ответ = await GeneralFunc.remoteCall("РаботаСБазойДанных.ВыполнитьЗапросRPC",
                     { ТекстЗапроса: text, Параметры: [props.ОкноСОбъектом.id_obj] });
                 if (!Ответ.err)
-                    МодельОбъекта.value[curTable.Таблица.Имя] = GeneralFunc.ОбработатьРезультатЗапросаДляОбработкиПолей(props.ОкноСОбъектом.Объект, Ответ.httpResponse.data);
+                    Данные.value[curTable.Таблица.Имя] = GeneralFunc.ОбработатьРезультатЗапросаДляОбработкиПолей(props.ОкноСОбъектом.Объект, Ответ.httpResponse.data);
                 else
                     toast.add({ severity: 'error', summary: 'Получение данных', detail: Ответ.err, life: 5000 });
 

@@ -71,21 +71,21 @@ function ОбработатьРезультатЗапросаДляОбрабо�
     return РезультатЗапроса;
 }
 
-async function ЗаписатьОбъект(Объект, МодельОбъекта, toast) {
+async function ЗаписатьОбъект(Объект, Данные, toast) {
 
     let additional_field = ("ДопПоля" in Объект) ? Объект.ДопПоля.map(field => field.Поле.split("as")[1].trim()) : [];
 
     let ПодчиненныеТаблицы = ("ПодчиненныеТаблицы" in Объект) ? Объект.ПодчиненныеТаблицы.map(field => field.Таблица.Имя) : [];
 
-    const array_field = Object.keys(МодельОбъекта).filter(key => key !== "id" && !additional_field.includes(key) && !ПодчиненныеТаблицы.includes(key));
+    const array_field = Object.keys(Данные).filter(key => key !== "id" && !additional_field.includes(key) && !ПодчиненныеТаблицы.includes(key));
     let Ответ;
-    if (!МодельОбъекта.id) {
+    if (!Данные.id) {
         const field_array = [];
         const value_array = [];
         array_field.forEach((key) => {
-            if (МодельОбъекта[key] != null) {
+            if (Данные[key] != null) {
                 field_array.push(key);
-                value_array.push(`'${МодельОбъекта[key]}'`);
+                value_array.push(`'${Данные[key]}'`);
             }
         });
         Ответ = await remoteCall("РаботаСБазойДанных.ВыполнитьЗапросRPC",
@@ -98,20 +98,20 @@ async function ЗаписатьОбъект(Объект, МодельОбъек
     } else {
         const array_values = [];
         array_field.forEach((key) => {
-            if (МодельОбъекта[key] != null) {
-                array_values.push(`${key} = '${МодельОбъекта[key]}'`);
+            if (Данные[key] != null) {
+                array_values.push(`${key} = '${Данные[key]}'`);
             }
         });
         Ответ = await remoteCall("РаботаСБазойДанных.ВыполнитьЗапросRPC",
             {
                 ТекстЗапроса: `UPDATE ${Объект.ТаблицаБД.Имя} SET ${array_values.join(",")} WHERE id = $1`,
-                Параметры: [МодельОбъекта.id]
+                Параметры: [Данные.id]
             });
         if (!Ответ.err)
             toast.add({ severity: 'info', summary: 'Запись данных', detail: Ответ.httpResponse.statusText, life: 5000 });
     }
     if (Ответ.data)
-        МодельОбъекта = Ответ.httpResponse.data[0]
+        Данные = Ответ.httpResponse.data[0]
     else if (Ответ.err)
         toast.add({ severity: 'error', summary: 'Запись данных', detail: Ответ.err, life: 5000 });
 }
