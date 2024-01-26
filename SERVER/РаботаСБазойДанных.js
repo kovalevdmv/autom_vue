@@ -30,7 +30,8 @@ async function ВыполнитьЗапросRPC(respons, Параметры) {
         respons.status(200).json(res);
     } catch (err) {
         console.error(err);
-        respons.status(200).json({ status: 'error', message: err.message });
+        const errorText = {Сообщение: err.message, ТекстЗапроса: Параметры.ТекстЗапроса, Параметры: Параметры.Параметры}
+        respons.status(200).json({ status: 'error', message: errorText });
     }
 }
 
