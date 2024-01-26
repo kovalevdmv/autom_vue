@@ -32,8 +32,11 @@
                 </div>
             </TabPanel>
             <TabPanel header="Создать таблицы базы данных">
-                <v-btn @click="ОбновитьТаблицыВБД">Обновить таблицы в БД</v-btn>
-                <div>
+                <div style="display: flex; gap: 10px; margin: 5px;">
+                    <v-btn @click="ОбновитьТаблицыВБД">Обновить таблицы в БД</v-btn>
+                    <v-btn @click="ВыбратьВсе">Выбрать все</v-btn>
+                </div>
+                <div style="margin: 5px;">
                     <div v-for="(el, index) of Данные.СписокТаблиц" :key="index">
                         <input type="checkbox" v-model="el.checked">
                         {{ el.table.Имя }}
@@ -52,6 +55,10 @@
 import { ref, inject, onMounted } from 'vue';
 import GeneralFunc from '@/GeneralFunc.js';
 import ТаблицыБД from '@/Настройки/ТаблицыБазыДанных';
+
+function ВыбратьВсе() {
+    Данные.value.СписокТаблиц.forEach(_ => _.checked = true);
+}
 
 function ОбновитьТаблицыВБД() {
     Данные.value.СписокТаблиц.filter(table => table.checked).forEach((table) => {

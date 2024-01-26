@@ -119,6 +119,22 @@ class ТаблицаВБД {
         return `nextval('${this.Имя}_${ИмяКолонки}_seq'::regclass)`;
     }
 
+    /*
+    DO $$
+BEGIN
+    -- Проверяем, существует ли колонка 'new_column' в таблице 'analoguesofnomenclature'
+    IF NOT EXISTS (
+        SELECT FROM information_schema.columns 
+        WHERE table_schema = 'public' 
+        AND table_name = 'analoguesofnomenclature' 
+        AND column_name = 'new_column2'
+    ) THEN
+        -- Добавляем колонку, если она не существует
+        ALTER TABLE public.analoguesofnomenclature ADD COLUMN new_column2 VARCHAR(255);
+    END IF;
+END$$;
+*/
+
     ТестЗапросаНаСоздание() {
 
         let Текст = '';
