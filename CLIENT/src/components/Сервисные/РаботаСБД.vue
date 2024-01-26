@@ -20,7 +20,7 @@
                         <div>Показывать ошибку в диалоге:</div>
                         <input type="checkbox" v-model="Данные.ПоказыватьОшибкуВДиалоге" />
                     </dev>
-                    <v-btn @click="ОбновитьДанные">Выполнить</v-btn>
+                    <v-btn @click="ВыполнитьЗапрос">Выполнить</v-btn>
                     <DataTable columnResizeMode='fit' scrollable scrollHeight='700px' selectionMode='single' stripedRows
                         size='small' :value='Данные.РезультатЗапроса' tableStyle='min-width: 50rem'
                         @row-dblclick='ДвойнойКликПоСтрокеТаблицы' :resizable-columns='true' sortField='id' :sortOrder='1'
@@ -39,12 +39,6 @@
                         {{ el.table.Имя }}
                     </div>
                 </div>
-                <!--
-                <h2>Текст запроса</h2>
-                <div v-for="(el, index) of Данные.СписокТаблиц" :key="index" v-if="el.checked">
-                    <textarea>{{ el.table.Имя }}</textarea>
-                </div>
-                -->
             </TabPanel>
         </TabView>
 
@@ -60,8 +54,9 @@ import GeneralFunc from '@/GeneralFunc.js';
 import ТаблицыБД from '@/Настройки/ТаблицыБазыДанных';
 
 function ОбновитьТаблицыВБД() {
-    Данные.value.СписокТаблиц.filter(table => table.checked).forEach((table)=>{
-        Данные.value.Запрос = table.table.ТестЗапросаНаСоздание();
+    Данные.value.СписокТаблиц.filter(table => table.checked).forEach((table) => {
+        //Данные.value.Запрос = table.table.ТестЗапросаНаСоздание();
+        ВыполнитьТекстЗапроса(table.table.ТестЗапросаНаСоздание());
         console.log(Данные.value.Запрос);
     });
 }
@@ -80,13 +75,15 @@ const Данные = ref(
 
 const toast = inject('toast');
 
-async function ОбновитьДанные() {
+async function ВыполнитьТекстЗапроса(ТексЗапроса) {
 
     const Ответ = await GeneralFunc.remoteCall('РаботаСБазойДанных.ВыполнитьЗапросRPC',
-        { ТекстЗапроса: Данные.value.Запрос });
+        { ТекстЗапроса: ТексЗапроса });
     if (!Ответ.err) {
         Данные.value.РезультатЗапроса = Ответ.httpResponse.data;
-        Данные.value.Колонки = Object.keys(Ответ.httpResponse.data[0]);
+        if (Ответ.httpResponse.data.lehght)
+            Данные.value.Колонки = Object.keys(Ответ.httpResponse.data[0]);
+        toast.add({ severity: 'info', summary: 'Выполнение запроса', detail: 'Успешно', life: 5000 });
     }
     else {
         Данные.value.ОшибкаЗапроса = Ответ.err;
@@ -94,6 +91,10 @@ async function ОбновитьДанные() {
         toast.add({ severity: 'error', summary: 'Получение данных', detail: Ответ.err, life: 5000 });
 
     }
+}
+
+async function ВыполнитьЗапрос() {
+    ВыполнитьТекстЗапроса(Данные.value.Запрос);
 }
 
 onMounted(() => {
