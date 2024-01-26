@@ -10,29 +10,32 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 
+import type { ДиалоговоеОкно } from '@/interfaces/КонфигурацияИнтерфейса.ts'
 import { defineProps, inject, onMounted } from 'vue';
 import GeneralFunc from "@/GeneralFunc.js"
-let { props } = defineProps(['props']);
+import type { ДанныеСущности } from '@/interfaces/КонфигурацияСистемы';
+const { props } = defineProps(['props']);
 const toast = inject('toast');
 const ЗакрытьДиалоговоеОкно = inject('ЗакрытьДиалоговоеОкно');
-const Данные = defineModel('Данные');
-const emit = defineEmits(['СобытиеПослеЗаполненияМоделиОбъекта','СобытиеПередЗакрытиемДиалога']);
+const Данные = defineModel<ДанныеСущности>('Данные');
+const emit = defineEmits(['СобытиеПослеЗаполненияМоделиОбъекта', 'СобытиеПередЗакрытиемДиалога']);
 
-function Закрыть(){
-    const ПараметрыСобытия = {Прервать: false};
+
+function Закрыть() {
+    const ПараметрыСобытия = { Прервать: false };
     emit('СобытиеПередЗакрытиемДиалога', ПараметрыСобытия);
     if (ПараметрыСобытия.Прервать)
         return;
-    ЗакрытьДиалоговоеОкно(props.ОкноСОбъектом);
+    ЗакрытьДиалоговоеОкно(props.ДиалоговоеОкно);
 }
 
 function Записать() {
-    GeneralFunc.ЗаписатьОбъект(props.ОкноСОбъектом.Объект, Данные.value, toast);
+    GeneralFunc.ЗаписатьОбъект(props.ДиалоговоеОкно.КонфигурацияСущности, Данные.value, toast);
 
-    if ('ПодчиненныеТаблицы' in props.ОкноСОбъектом.Объект)
-        for (let curChieldTable of props.ОкноСОбъектом.Объект.ПодчиненныеТаблицы)
+    if ('ПодчиненныеТаблицы' in props.ДиалоговоеОкно.КонфигурацияСущности)
+        for (let curChieldTable of props.ДиалоговоеОкно.КонфигурацияСущности.ПодчиненныеТаблицы)
             for (let curline of Данные.value[curChieldTable.Таблица.Имя])
                 GeneralFunc.ЗаписатьОбъект(curChieldTable.Таблица, curline, toast);
 }
@@ -43,7 +46,7 @@ async function Удалить() {
         return;
     const Ответ = await GeneralFunc.remoteCall("РаботаСБазойДанных.ВыполнитьЗапросRPC",
         {
-            ТекстЗапроса: `DELETE FROM ${props.ОкноСОбъектом.Объект.ТаблицаБД.Имя} WHERE id = $1`,
+            ТекстЗапроса: `DELETE FROM ${props.ДиалоговоеОкно.КонфигурацияСущности.ТаблицаБД.Имя} WHERE id = $1`,
             Параметры: [Данные.value.id]
         });
 
@@ -55,28 +58,28 @@ async function Удалить() {
 }
 
 async function ОбновитьДанные() {
-    if (props.ОкноСОбъектом.id_obj) {
-        let ТекстЗапроса = `SELECT T.* FROM ${props.ОкноСОбъектом.Объект.ТаблицаБД.Имя} AS T WHERE T.id = $1 ORDER BY ID`;
-        ТекстЗапроса = GeneralFunc.ОбработатьТекстЗапросаДляДопПолей(props.ОкноСОбъектом.Объект, ТекстЗапроса);
+    if (props.ДиалоговоеОкно.ДанныеСущности.id) {
+        let ТекстЗапроса = `SELECT T.* FROM ${props.ДиалоговоеОкно.КонфигурацияСущности.ТаблицаБД.Имя} AS T WHERE T.id = $1 ORDER BY ID`;
+        ТекстЗапроса = GeneralFunc.ОбработатьТекстЗапросаДляДопПолей(props.ДиалоговоеОкно.КонфигурацияСущности, ТекстЗапроса);
         const Ответ = await GeneralFunc.remoteCall("РаботаСБазойДанных.ВыполнитьЗапросRPC",
-            { ТекстЗапроса: ТекстЗапроса, Параметры: [props.ОкноСОбъектом.id_obj] });
+            { ТекстЗапроса: ТекстЗапроса, Параметры: [props.ДиалоговоеОкно.ДанныеСущности.id] });
         if (!Ответ.err)
-            Данные.value = GeneralFunc.ОбработатьРезультатЗапросаДляОбработкиПолей(props.ОкноСОбъектом.Объект, Ответ.httpResponse.data)[0];
+            Данные.value = GeneralFunc.ОбработатьРезультатЗапросаДляОбработкиПолей(props.ДиалоговоеОкно.КонфигурацияСущности, Ответ.httpResponse.data)[0];
         else
             toast.add({ severity: 'error', summary: 'Получение данных', detail: Ответ.err, life: 5000 });
 
         // Заполнение данных связанных таблиц
 
-        if (props.ОкноСОбъектом.Объект.ПодчиненныеТаблицы) {
-            for (let curTable of props.ОкноСОбъектом.Объект.ПодчиненныеТаблицы) {
-                let text = `SELECT T.* FROM ${curTable.Таблица.ТаблицаБД.Имя} AS T INNER JOIN ${props.ОкноСОбъектом.Объект.ТаблицаБД.Имя} AS MAIN_TABLE ON MAIN_TABLE.${curTable.КлючГлавнойТаблицы}=T.${curTable.КолонкаСВнешнимКлючемВПодчиненнойТаблице}`;
+        if (props.ДиалоговоеОкно.КонфигурацияСущности.ПодчиненныеТаблицы) {
+            for (let curTable of props.ДиалоговоеОкно.КонфигурацияСущности.ПодчиненныеТаблицы) {
+                let text = `SELECT T.* FROM ${curTable.Таблица.ТаблицаБД.Имя} AS T INNER JOIN ${props.ДиалоговоеОкно.КонфигурацияСущности.ТаблицаБД.Имя} AS MAIN_TABLE ON MAIN_TABLE.${curTable.КлючГлавнойТаблицы}=T.${curTable.КолонкаСВнешнимКлючемВПодчиненнойТаблице}`;
                 text = GeneralFunc.ОбработатьТекстЗапросаДляДопПолей(curTable, text);
                 text += ' WHERE MAIN_TABLE.id = $1';
                 text += ' ORDER BY T.id';
                 let Ответ = await GeneralFunc.remoteCall("РаботаСБазойДанных.ВыполнитьЗапросRPC",
-                    { ТекстЗапроса: text, Параметры: [props.ОкноСОбъектом.id_obj] });
+                    { ТекстЗапроса: text, Параметры: [props.ДиалоговоеОкно.ДанныеСущности.id] });
                 if (!Ответ.err)
-                    Данные.value[curTable.Таблица.Имя] = GeneralFunc.ОбработатьРезультатЗапросаДляОбработкиПолей(props.ОкноСОбъектом.Объект, Ответ.httpResponse.data);
+                    Данные.value[curTable.Таблица.Имя] = GeneralFunc.ОбработатьРезультатЗапросаДляОбработкиПолей(props.ДиалоговоеОкно.КонфигурацияСущности, Ответ.httpResponse.data);
                 else
                     toast.add({ severity: 'error', summary: 'Получение данных', detail: Ответ.err, life: 5000 });
 

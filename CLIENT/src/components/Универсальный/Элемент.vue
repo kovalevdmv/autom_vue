@@ -6,17 +6,51 @@
         <BaseDialog :props="props" v-model:Данные="Данные"
             @СобытиеПослеЗаполненияМоделиОбъекта="СобытиеПослеЗаполненияМоделиОбъекта"
             @СобытиеПередЗакрытиемДиалога="СобытиеПередЗакрытиемДиалога" />
-        
+
         <!-- +++ Универсальное заполнение реквизитов -->
         <div style="display: grid; grid-template-columns: 1fr 5fr; gap: 5px; padding: 10px; margin: 5px;">
-            <template v-for="curFiled of props.ОкноСОбъектом.Объект.ПредставлениеЭлемента.НастройкаПолей"
+            <template v-for="curFiled of props.ДиалоговоеОкно.КонфигурацияСущности.ПредставлениеЭлемента.НастройкаПолей"
                 :key="curFiled.Имя">
                 <div>{{ curFiled.Заголовок }}:</div>
                 <EnterField :styleForInput="curFiled.Стили ? curFiled.Стили : ''"
                     :attrForInput="curFiled.Атрибуты ? curFiled.Атрибуты : ''" v-model:id=Данные[curFiled.Имя]
                     :ТаблицаВнешнегоКлюча=curFiled.ТаблицаВнешнегоКлюча v-model:Данные=Данные
-                    :ОбработчикПослеЗаполненияВнешнегоКлюча = curFiled.ОбработчикПослеЗаполненияВнешнегоКлюча />
+                    :ОбработчикПослеЗаполненияВнешнегоКлюча=curFiled.ОбработчикПослеЗаполненияВнешнегоКлюча />
             </template>
+        </div>
+        <!-- --- -->
+
+        <!-- +++ Универсальное заполнение подчиненных табличных частей -->
+        <div v-for="curChiledTable of props.ДиалоговоеОкно.КонфигурацияСущности.ПодчиненныеТаблицы" :key="curChiledTable.Таблица.Имя">
+            <div v-if="Данные[curChiledTable.Таблица.Имя]"
+                style="border-width: 1px; border-style: solid; padding: 10px; margin: 10px;">
+                <h2>{{ curChiledTable.ПредставлениеСписка.Заголовок }}</h2>
+                <div style="display: flex; gap: 10px; padding: 10px;">
+                    <v-btn
+                        @click="ДобавитьСтрокуВПодчиненнуюТаблицу(curChiledTable, Данные[curChiledTable.Таблица.Имя])">Добавить</v-btn>
+                </div>
+                <v-table density="compact">
+                    <thead>
+                        <tr>
+                            <th class="text-left" v-for="field of curChiledTable.ПредставлениеСписка.НастройкаПолей"
+                                :key="field.Имя">
+                                {{ field.Заголовок ? field.Заголовок : field.Имя }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item, index) in Данные[curChiledTable.Таблица.Имя]" :key="item.name">
+                            <td v-for="curFiled of curChiledTable.ПредставлениеСписка.НастройкаПолей">
+                                <EnterField :styleForInput="curFiled.Стили ? curFiled.Стили : ''"
+                                    :attrForInput="curFiled.Атрибуты ? curFiled.Атрибуты : {}" v-model:id=item[curFiled.Имя]
+                                    :ТаблицаВнешнегоКлюча=curFiled.ТаблицаВнешнегоКлюча
+                                    v-model:Данные=Данные[curChiledTable.Таблица.Имя][index]
+                                    :ОбработчикПослеЗаполненияВнешнегоКлюча=curFiled.ОбработчикПослеЗаполненияВнешнегоКлюча />
+                            </td>
+                        </tr>
+                    </tbody>
+                </v-table>
+            </div>
         </div>
         <!-- --- -->
 
@@ -25,16 +59,16 @@
   
 <script setup lang="ts">
 
-const props = defineProps(['ОкноСОбъектом']);
+const props = defineProps(['ДиалоговоеОкно']);
 import { ref } from 'vue';
 let Заголовок = ref('Элемент');
 
 import EnterField from '@/components/UI/ПолеВвода.vue'
 import BaseDialog from '@/components/Универсальный/БазовыйДиалог.vue'
 
-const Данные = ref({ id: '' });
+const Данные = ref({ id: 0 });
 
-function СобытиеПередЗакрытиемДиалога(ПараметрыСобытия){
+function СобытиеПередЗакрытиемДиалога(ПараметрыСобытия) {
     //ПараметрыСобытия.Прервать = false;
 }
 
@@ -45,10 +79,10 @@ function ДобавитьСтрокуВПодчиненнуюТаблицу(На
 }
 
 const ВычислитьЗаголовок = () => {
-    if (typeof props.ОкноСОбъектом.Объект.ПредставлениеЭлемента.Заголовок === 'function')
-        Заголовок.value = props.ОкноСОбъектом.Объект.ПредставлениеЭлемента.Заголовок(Данные.value);
+    if (typeof props.ДиалоговоеОкно.КонфигурацияСущности.ПредставлениеЭлемента.Заголовок === 'function')
+        Заголовок.value = props.ДиалоговоеОкно.КонфигурацияСущности.ПредставлениеЭлемента.Заголовок(Данные.value);
     else
-        Заголовок.value = props.ОкноСОбъектом.Объект.ПредставлениеЭлемента.Заголовок;
+        Заголовок.value = props.ДиалоговоеОкно.КонфигурацияСущности.ПредставлениеЭлемента.Заголовок;
 };
 
 function СобытиеПослеЗаполненияМоделиОбъекта() {
