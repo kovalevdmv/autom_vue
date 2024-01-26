@@ -54,4 +54,11 @@ app.component('Toolbar', Toolbar);
 import Divider from 'primevue/divider';
 app.component('Divider', Divider);
 
+
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
+app.component('TabView', TabView);
+app.component('TabPanel', TabPanel);
+
+
 app.mount('#app')

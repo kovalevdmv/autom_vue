@@ -21,37 +21,41 @@
         <!-- --- -->
 
         <!-- +++ Универсальное заполнение подчиненных табличных частей -->
-        <div v-for="curChiledTable of props.ДиалоговоеОкно.КонфигурацияСущности.ПодчиненныеТаблицы" :key="curChiledTable.Таблица.Имя">
-            <div v-if="Данные[curChiledTable.Таблица.Имя]"
-                style="border-width: 1px; border-style: solid; padding: 10px; margin: 10px;">
-                <h2>{{ curChiledTable.ПредставлениеСписка.Заголовок }}</h2>
-                <div style="display: flex; gap: 10px; padding: 10px;">
-                    <v-btn
-                        @click="ДобавитьСтрокуВПодчиненнуюТаблицу(curChiledTable, Данные[curChiledTable.Таблица.Имя])">Добавить</v-btn>
+        <TabView>
+            <TabPanel v-for="curChiledTable of props.ДиалоговоеОкно.КонфигурацияСущности.ПодчиненныеТаблицы"
+                :key="curChiledTable.Таблица.Имя" :header="curChiledTable.Таблица.Имя">
+                <div v-if="Данные[curChiledTable.Таблица.Имя]"
+                    style="border-width: 1px; border-style: solid; padding: 10px; margin: 10px;">
+                    <h2>{{ curChiledTable.ПредставлениеСписка.Заголовок }}</h2>
+                    <div style="display: flex; gap: 10px; padding: 10px;">
+                        <v-btn
+                            @click="ДобавитьСтрокуВПодчиненнуюТаблицу(curChiledTable, Данные[curChiledTable.Таблица.Имя])">Добавить</v-btn>
+                    </div>
+                    <v-table density="compact">
+                        <thead>
+                            <tr>
+                                <th class="text-left" v-for="field of curChiledTable.ПредставлениеСписка.НастройкаПолей"
+                                    :key="field.Имя">
+                                    {{ field.Заголовок ? field.Заголовок : field.Имя }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item, index) in Данные[curChiledTable.Таблица.Имя]" :key="item.name">
+                                <td v-for="curFiled of curChiledTable.ПредставлениеСписка.НастройкаПолей">
+                                    <EnterField :styleForInput="curFiled.Стили ? curFiled.Стили : ''"
+                                        :attrForInput="curFiled.Атрибуты ? curFiled.Атрибуты : {}"
+                                        v-model:id=item[curFiled.Имя] :ТаблицаВнешнегоКлюча=curFiled.ТаблицаВнешнегоКлюча
+                                        v-model:Данные=Данные[curChiledTable.Таблица.Имя][index]
+                                        :ОбработчикПослеЗаполненияВнешнегоКлюча=curFiled.ОбработчикПослеЗаполненияВнешнегоКлюча />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </v-table>
                 </div>
-                <v-table density="compact">
-                    <thead>
-                        <tr>
-                            <th class="text-left" v-for="field of curChiledTable.ПредставлениеСписка.НастройкаПолей"
-                                :key="field.Имя">
-                                {{ field.Заголовок ? field.Заголовок : field.Имя }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(item, index) in Данные[curChiledTable.Таблица.Имя]" :key="item.name">
-                            <td v-for="curFiled of curChiledTable.ПредставлениеСписка.НастройкаПолей">
-                                <EnterField :styleForInput="curFiled.Стили ? curFiled.Стили : ''"
-                                    :attrForInput="curFiled.Атрибуты ? curFiled.Атрибуты : {}" v-model:id=item[curFiled.Имя]
-                                    :ТаблицаВнешнегоКлюча=curFiled.ТаблицаВнешнегоКлюча
-                                    v-model:Данные=Данные[curChiledTable.Таблица.Имя][index]
-                                    :ОбработчикПослеЗаполненияВнешнегоКлюча=curFiled.ОбработчикПослеЗаполненияВнешнегоКлюча />
-                            </td>
-                        </tr>
-                    </tbody>
-                </v-table>
-            </div>
-        </div>
+
+            </TabPanel>
+        </TabView>
         <!-- --- -->
 
     </div>
