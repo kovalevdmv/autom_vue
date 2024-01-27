@@ -109,7 +109,7 @@ class ТаблицаВБД {
         this.Колонки = [];
     }
 
-    ДобавитьКолонку(Имя: string) {
+    Колонка(Имя: string) {
         const НоваяКолонка = new Колонка(Имя);
         this.Колонки.push(НоваяКолонка);
         return НоваяКолонка;
@@ -126,7 +126,7 @@ class ТаблицаВБД {
             IF NOT EXISTS (
                 SELECT FROM information_schema.columns 
                 WHERE table_schema = '${this._Схема}'
-                AND table_name = '${this.Имя}' 
+                AND table_name = '${this.Имя}'
                 AND column_name = '${ЗначенияПолей.Имя}'
             ) THEN
                 ALTER TABLE ${this._Схема}.${this.Имя} ADD COLUMN ${ЗначенияПолей.Имя} ${ЗначенияПолей.Тип} ${ЗначенияПолей.ПризнакНеNull ? 'NOT NULL' : ''} ${ЗначенияПолей.ЗначениеПоУмолчанию ? ' DEFAULT ' + ЗначенияПолей.ЗначениеПоУмолчанию : ''} ${ЗначенияПолей.АвтоИнкремент ? ' DEFAULT ' + this.СледующееЗначениеВПоследовательности(ЗначенияПолей.Имя) : ''};
