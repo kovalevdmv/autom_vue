@@ -9,8 +9,7 @@
 
         <!-- +++ Универсальное заполнение реквизитов -->
         <div style="display: grid; grid-template-columns: 1fr 5fr; gap: 5px; padding: 10px; margin: 5px;">
-            <template v-for="curFiled of props.ДиалоговоеОкно.КонфигурацияСущности.ПредставлениеЭлемента.НастройкаПолей"
-                :key="curFiled.Имя">
+            <template v-for="curFiled of ПоляШапки" :key="curFiled.Имя">
                 <div>{{ curFiled.Заголовок }}:</div>
                 <EnterField v-model:id="Данные[curFiled.Имя]" v-model:Данные="Данные" :НастройкаПоля="curFiled" />
             </template>
@@ -59,13 +58,14 @@
 <script setup lang="ts">
 
 const props = defineProps(['ДиалоговоеОкно']);
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 let Заголовок = ref('Элемент');
 
 import EnterField from '@/components/UI/ПолеВвода.vue'
 import BaseDialog from '@/components/Универсальный/БазовыйДиалог.vue'
 
 const Данные = ref({ id: 0 });
+const ПоляШапки = ref([]);
 
 function СобытиеПередЗакрытиемДиалога(ПараметрыСобытия) {
     //ПараметрыСобытия.Прервать = false;
@@ -87,6 +87,22 @@ const ВычислитьЗаголовок = () => {
 function СобытиеПослеЗаполненияМоделиОбъекта() {
     ВычислитьЗаголовок();
 }
+
+onMounted(() => {
+    if (Array.isArray(props.ДиалоговоеОкно.КонфигурацияСущности.ПредставлениеСписка.НастройкаПолей))
+        ПоляШапки.value = [...props.ДиалоговоеОкно.КонфигурацияСущности.ПредставлениеСписка.НастройкаПолей];
+    else
+        ПоляШапки.value = [];
+    if (ПоляШапки.value.length == 0 || ПоляШапки.value.filter(el => el.Имя == "*").length > 0) {
+        for (let Колонка of props.ДиалоговоеОкно.КонфигурацияСущности.ТаблицаБД.Колонки)
+            ПоляШапки.value.push({ Имя: Колонка._Имя, Заголовок: Колонка._Синоним });
+        for (let Колонка of props.ДиалоговоеОкно.КонфигурацияСущности.ДопПоля) {
+            const ИмяПоля = (Колонка.Поле.toLowerCase().includes(" as ") ? Колонка.Поле.toLowerCase().split("as")[1] : Колонка.Поле).trim();
+            ПоляШапки.value.push({ Имя: ИмяПоля, Заголовок: Колонка.Заголовок });
+        }
+    }
+    ПоляШапки.value = ПоляШапки.value.filter(el => el.Имя !== "*");
+});
 
 </script>
 

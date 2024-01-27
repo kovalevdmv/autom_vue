@@ -95,7 +95,7 @@ function ОбновитьТаблицыВБД() {
 
 const Данные = ref(
     {
-        Запрос: 'select row_number() over(order by id) as index, * from nomenclatures',
+        Запрос: 'select row_number() over(order by id) as index, * from goods',
         РезультатЗапроса: [],
         Колонки: [],
         ПоказатьДиалогСОшибкой: false,
@@ -131,7 +131,7 @@ async function ВыполнитьЗапрос() {
 }
 
 onMounted(() => {
-    Данные.value.СписокТаблиц = ТаблицыБД.map(table => ({
+    Данные.value.СписокТаблиц = Object.values(ТаблицыБД).map(table => ({
         table: table,
         checked: false
     }));

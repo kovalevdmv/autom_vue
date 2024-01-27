@@ -12,8 +12,8 @@
         <DataTable columnResizeMode='fit' scrollable scrollHeight='700px' selectionMode='single' stripedRows size='small'
             :value='МассивОбъектов' tableStyle='min-width: 50rem' @row-dblclick='ДвойнойКликПоСтрокеТаблицы'
             :resizable-columns='true' sortField='id' :sortOrder='1' showGridlines style="user-select: none;">
-            <Column v-for='col of props.ДиалоговоеОкно.КонфигурацияСущности.ПредставлениеСписка.НастройкаПолей'
-                :key='col.Имя' :field='col.Имя' :header='col.Заголовок ? col.Заголовок : col.Имя' :sortable='true'>
+            <Column v-for='col of Поля' :key='col.Имя' :field='col.Имя' :header='col.Заголовок ? col.Заголовок : col.Имя'
+                :sortable='true'>
             </Column>
         </DataTable>
 
@@ -24,6 +24,8 @@
 
 import type { ДиалоговоеОкно } from '@/interfaces/КонфигурацияИнтерфейса';
 import { ТипКомпонентаПредставления } from '@/interfaces/КонфигурацияИнтерфейса';
+
+const Поля = ref([]);
 
 const СоздатьДиалоговоеОкно = inject('СоздатьДиалоговоеОкно');
 const ЗакрытьДиалоговоеОкно = inject('ЗакрытьДиалоговоеОкно');
@@ -75,6 +77,21 @@ async function ОбновитьДанные() {
         МассивОбъектов.value = ОбщииФукнции.ОбработатьРезультатЗапросаДляОбработкиПолей(props.ДиалоговоеОкно.КонфигурацияСущности, Ответ.data);
     else
         toast.add({ severity: 'error', summary: 'Получение данных', detail: Ответ.err, life: 5000 });
+
+    // Если колонки списка не указаны явно, вывести все что указна для создания таблиц
+    if (Array.isArray(props.ДиалоговоеОкно.КонфигурацияСущности.ПредставлениеСписка.НастройкаПолей))
+        Поля.value = [...props.ДиалоговоеОкно.КонфигурацияСущности.ПредставлениеСписка.НастройкаПолей];
+    else
+        Поля.value = [];
+    if (Поля.value.length == 0 || Поля.value.filter(el => el.Имя == "*").length > 0) {
+        for (let Колонка of props.ДиалоговоеОкно.КонфигурацияСущности.ТаблицаБД.Колонки)
+            Поля.value.push({ Имя: Колонка._Имя, Заголовок: Колонка._Синоним });
+        for (let Колонка of props.ДиалоговоеОкно.КонфигурацияСущности.ДопПоля){
+            const ИмяПоля = (Колонка.Поле.toLowerCase().includes(" as ") ? Колонка.Поле.toLowerCase().split("as")[1] : Колонка.Поле).trim();
+            Поля.value.push({ Имя: ИмяПоля, Заголовок: Колонка.Заголовок });
+        }
+    }
+    Поля.value = Поля.value.filter(el => el.Имя !== "*");
 }
 
 onMounted(ОбновитьДанные);
