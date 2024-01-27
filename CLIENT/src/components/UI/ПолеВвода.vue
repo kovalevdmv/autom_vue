@@ -7,10 +7,11 @@
             @click="ОбработчикНажатияПоКнопкеОткрытия" title='Открыть значение в связанной таблице'>O</div>
 
 
-        <input v-if="props.НастройкаПоля.Тип !== 'Дата'" type="text" class="edit" :style="props.НастройкаПоля.styleForInput"
+        <input v-if="props.НастройкаПоля.Тип !== 'Дата'" type="text" class="edit_100per" :style="props.НастройкаПоля.Стили"
             v-model="id" />
-        <Calendar @date-select="ПриВыбореДаты" v-if="props.НастройкаПоля.Тип == 'Дата'" showButtonBar showIcon showTime
+        <Calendar class="edit" @date-select="ПриВыбореДаты" v-if="props.НастройкаПоля.Тип == 'Дата'" showButtonBar showIcon showTime
             hourFormat="24" v-model="id" dateFormat="@" />
+            
 
     </div>
 </template>
@@ -64,11 +65,17 @@ function ОбработчикНажатияПоКнопкеВыбора() {
 </script>
 
 <style scope>
-.edit {
+.edit_100per {
     padding: 1px;
     margin: 1px;
     box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.3);
     width: 100%
+}
+
+.edit {
+    padding: 1px;
+    margin: 1px;
+    box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.3);
 }
 
 .button {

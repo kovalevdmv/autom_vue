@@ -5,15 +5,17 @@
     <!-- +++ Главная панель -->
     <div style="border-style: solid; border-width: 1px; display: flex; gap: 10px; padding: 5px;">
       <div v-for="el in ГлавноеМеню.Элементы" :key="el.Представление" style="display: flex;">
-        <a class="link_mail_panel" @click.prevent="ОбработчикНажатияПоСсылке(el.КонфигурацияСущности)">{{ el.Представление }}</a>
+        <a class="link_mail_panel" @click.prevent="ОбработчикНажатияПоСсылке(el.КонфигурацияСущности)">{{ el.Представление
+        }}</a>
       </div>
     </div>
     <!-- --- Главная панель -->
 
     <!-- +++ Таксбар -->
     <div style="border-style: solid; border-width: 1px; display: flex;" class="my-component">
-      <div v-for="curDialogWindow in СозданныеДиалоговыеОкна" :key="curDialogWindow.id" @click="ОбработчикНажатияПоЗадаче(curDialogWindow)"
-        class="task" :class="{ active: curDialogWindow === ТекущийАктивноеДиалоговоеОкно }">
+      <div v-for="curDialogWindow in СозданныеДиалоговыеОкна" :key="curDialogWindow.id"
+        @click="ОбработчикНажатияПоЗадаче(curDialogWindow)" class="task"
+        :class="{ active: curDialogWindow === ТекущийАктивноеДиалоговоеОкно }">
         {{ curDialogWindow.КонфигурацияСущности.Имя }}
         <div @click.stop="ОбработчикНажатияПоЗакрытьЗадачу(curDialogWindow)"
           style="box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.5); padding-left: 7px; padding-right: 7px; margin-left: 5px; background-color: #ec3b41b3; border-radius: 5px; cursor: pointer;">
@@ -25,8 +27,10 @@
     <component v-for="curDialogWindow in СозданныеДиалоговыеОкна" :key="curDialogWindow.id"
       :ОбработчикВыбораВнешнегоКлюча="curDialogWindow.ОбработчикВыбораВнешнегоКлюча"
       v-show="curDialogWindow === ТекущийАктивноеДиалоговоеОкно"
-      :is=curDialogWindow.КонфигурацияСущности[curDialogWindow.ТипКомпонентаПредставления].Компонента :ДиалоговоеОкно="curDialogWindow" />
+      :is=curDialogWindow.КонфигурацияСущности[curDialogWindow.ТипКомпонентаПредставления].Компонента
+      :ДиалоговоеОкно="curDialogWindow" />
     <!-- <router-view></router-view> -->
+
   </div>
 </template>
 
