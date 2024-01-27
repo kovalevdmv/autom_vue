@@ -11,16 +11,16 @@ const deepAssignObject = (target, source) => {
     });
 };
 
-import { apiConfig } from "@/sett.js";
+import { apiConfig } from "@/sett.ts";
 import axios from 'axios';
 
-const remoteCall = async (MethodName, ПарамерВызова) => {
+const ВызватьМетодНаСервере = async (MethodName, ПарамерВызова) => {
     try {
         const Ob = { MethodName: MethodName, Parameters: ПарамерВызова };
         const response = await axios.post(`${apiConfig.url}/rpc/`, Ob);
         if (response.data.status == 'error')
             return { httpResponse: response, err: response.data.message };
-        return { httpResponse: response, err: '' };
+        return { httpResponse: response, data: response.data, err: '' };
     } catch (error) {
         const ErrorText = `"Ошибка при получении данных: ${error} (${JSON.stringify(ПарамерВызова)})`;
         console.error("Ошибка при получении данных: ", ErrorText);
@@ -88,7 +88,7 @@ async function ЗаписатьОбъект(Объект, Данные, toast) {
                 value_array.push(`'${Данные[key]}'`);
             }
         });
-        Ответ = await remoteCall("РаботаСБазойДанных.ВыполнитьЗапросRPC",
+        Ответ = await ВызватьМетодНаСервере("РаботаСБазойДанных.ВыполнитьЗапросRPC",
             {
                 ТекстЗапроса: `INSERT INTO ${Объект.ТаблицаБД.Имя} (${field_array.join(",")}) VALUES (${value_array.join(",")})`,
                 Параметры: []
@@ -102,7 +102,7 @@ async function ЗаписатьОбъект(Объект, Данные, toast) {
                 array_values.push(`${key} = '${Данные[key]}'`);
             }
         });
-        Ответ = await remoteCall("РаботаСБазойДанных.ВыполнитьЗапросRPC",
+        Ответ = await ВызватьМетодНаСервере("РаботаСБазойДанных.ВыполнитьЗапросRPC",
             {
                 ТекстЗапроса: `UPDATE ${Объект.ТаблицаБД.Имя} SET ${array_values.join(",")} WHERE id = $1`,
                 Параметры: [Данные.id]
@@ -111,9 +111,9 @@ async function ЗаписатьОбъект(Объект, Данные, toast) {
             toast.add({ severity: 'info', summary: 'Запись данных', detail: Ответ.httpResponse.statusText, life: 5000 });
     }
     if (Ответ.data)
-        Данные = Ответ.httpResponse.data[0]
+        Данные = Ответ.data[0]
     else if (Ответ.err)
         toast.add({ severity: 'error', summary: 'Запись данных', detail: Ответ.err, life: 5000 });
 }
 
-export default { deepAssignObject, remoteCall, ОбработатьТекстЗапросаДляДопПолей, ОбработатьРезультатЗапросаДляОбработкиПолей, ЗаписатьОбъект };
+export default { deepAssignObject, ВызватьМетодНаСервере, ОбработатьТекстЗапросаДляДопПолей, ОбработатьРезультатЗапросаДляОбработкиПолей, ЗаписатьОбъект };

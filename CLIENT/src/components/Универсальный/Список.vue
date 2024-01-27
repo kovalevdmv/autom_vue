@@ -37,7 +37,7 @@ const props = defineProps(['ДиалоговоеОкно', 'Обработчик
 import { ref, onMounted, computed, inject } from 'vue';
 import { useToast } from 'primevue/usetoast';
 const toast = useToast();
-import GeneralFunc from '@/GeneralFunc.js';
+import ОбщииФукнции from '@/ОбщииФукнции.ts';
 
 const ДвойнойКликПоСтрокеТаблицы = (Ev) => {
     if (props.ДиалоговоеОкно.РежимВыбора) {
@@ -68,11 +68,11 @@ const МассивОбъектов = ref([]);
 async function ОбновитьДанные() {
 
     let ТекстЗапроса = `SELECT T.* FROM ${props.ДиалоговоеОкно.КонфигурацияСущности.ТаблицаБД.Имя} AS T`;
-    ТекстЗапроса = GeneralFunc.ОбработатьТекстЗапросаДляДопПолей(props.ДиалоговоеОкно.КонфигурацияСущности, ТекстЗапроса);
-    const Ответ = await GeneralFunc.remoteCall('РаботаСБазойДанных.ВыполнитьЗапросRPC',
+    ТекстЗапроса = ОбщииФукнции.ОбработатьТекстЗапросаДляДопПолей(props.ДиалоговоеОкно.КонфигурацияСущности, ТекстЗапроса);
+    const Ответ = await ОбщииФукнции.ВызватьМетодНаСервере('РаботаСБазойДанных.ВыполнитьЗапросRPC',
         { ТекстЗапроса: ТекстЗапроса });
     if (!Ответ.err)
-        МассивОбъектов.value = GeneralFunc.ОбработатьРезультатЗапросаДляОбработкиПолей(props.ДиалоговоеОкно.КонфигурацияСущности, Ответ.httpResponse.data);
+        МассивОбъектов.value = ОбщииФукнции.ОбработатьРезультатЗапросаДляОбработкиПолей(props.ДиалоговоеОкно.КонфигурацияСущности, Ответ.data);
     else
         toast.add({ severity: 'error', summary: 'Получение данных', detail: Ответ.err, life: 5000 });
 }
@@ -81,4 +81,4 @@ onMounted(ОбновитьДанные);
 
 </script>
   
-<style scoped></style>
+<style scoped></style>@/ОбщииФукнции.ts

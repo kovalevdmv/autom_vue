@@ -54,7 +54,7 @@
 <script setup lang="ts">
 
 import { ref, inject, onMounted } from 'vue';
-import GeneralFunc from '@/GeneralFunc.js';
+import ОбщииФукнции from '@/ОбщииФукнции.ts';
 import ТаблицыБД from '@/Настройки/ТаблицыБазыДанных';
 
 function ВыбратьВсе() {
@@ -92,12 +92,12 @@ const toast = inject('toast');
 
 async function ВыполнитьТекстЗапроса(ТексЗапроса) {
 
-    const Ответ = await GeneralFunc.remoteCall('РаботаСБазойДанных.ВыполнитьЗапросRPC',
+    const Ответ = await ОбщииФукнции.ВызватьМетодНаСервере('РаботаСБазойДанных.ВыполнитьЗапросRPC',
         { ТекстЗапроса: ТексЗапроса });
     if (!Ответ.err) {
-        Данные.value.РезультатЗапроса = Ответ.httpResponse.data;
-        if (Ответ.httpResponse.data.lehght)
-            Данные.value.Колонки = Object.keys(Ответ.httpResponse.data[0]);
+        Данные.value.РезультатЗапроса = Ответ.data;
+        if (Ответ.data.length)
+            Данные.value.Колонки = Object.keys(Ответ.data[0]);
         toast.add({ severity: 'info', summary: 'Выполнение запроса', detail: 'Успешно', life: 5000 });
     }
     else {
@@ -119,4 +119,4 @@ onMounted(() => {
     }));
 });
 
-</script>
+</script>@/ОбщииФукнции.ts
