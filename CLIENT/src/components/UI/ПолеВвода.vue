@@ -7,11 +7,14 @@
             @click="ОбработчикНажатияПоКнопкеОткрытия" title='Открыть значение в связанной таблице'>O</div>
 
 
-        <input v-if="props.НастройкаПоля.Тип !== 'Дата'" type="text" class="edit_100per" :style="props.НастройкаПоля.Стили"
+        <input
+            @keydown.enter="ОбработкаЗавершенияРедактированияЭлемента"
+            @blur="ОбработкаЗавершенияРедактированияЭлемента"
+            v-if="props.НастройкаПоля.Тип !== 'Дата'" type="text" class="edit_100per" :style="props.НастройкаПоля.Стили"
             v-model="id" />
-        <Calendar class="edit" @date-select="ПриВыбореДаты" v-if="props.НастройкаПоля.Тип == 'Дата'" showButtonBar showIcon showTime
-            hourFormat="24" v-model="id" dateFormat="@" />
-            
+        <Calendar class="edit" @date-select="ПриВыбореДаты" v-if="props.НастройкаПоля.Тип == 'Дата'" showButtonBar showIcon
+            showTime hourFormat="24" v-model="id" dateFormat="@" />
+
 
     </div>
 </template>
@@ -25,6 +28,10 @@ import { ТипКомпонентаПредставления } from '@/interfac
 const id = defineModel('id');
 const Данные = defineModel('Данные');
 const props = defineProps(['НастройкаПоля']);
+
+function ОбработкаЗавершенияРедактированияЭлемента(){
+   props.НастройкаПоля.ОбработчикЗавершениеРедактированияЭлемента && props.НастройкаПоля.ОбработчикЗавершениеРедактированияЭлемента(Данные.value);
+}
 
 function ПриВыбореДаты(значение) {
     id.value = (new Date(значение)).toISOString(); // в формат ISO 8601 для вставки в PG
