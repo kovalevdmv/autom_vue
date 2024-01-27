@@ -2,6 +2,7 @@
 class ТипыКолонок {
     static readonly INTEGER: string = 'INTEGER';
     static readonly NUMERIC: string = 'NUMERIC';
+    static readonly timestamp_with_time_zone: string = 'timestamp with time zone';
     static NUMERIC_ТОЧНОСТЬ(ЦелаяЧасть: number, ДробнаяЧасть: number): string { return `NUMERIC(${ЦелаяЧасть},${ДробнаяЧасть})` };
     static readonly TEXT: string = 'TEXT';
 }
@@ -98,12 +99,14 @@ class Колонка {
 class ТаблицаВБД {
 
     Имя = '';
+    Синоним = '';
     private Колонки: Колонка[];
     private _Владелец = 'postgres';
     private _Схема = 'public';
 
-    constructor(Имя: string, Схема: string = 'public', Владелец: string = 'postgres') {
+    constructor(Имя: string, Синоним: string, Схема: string = 'public', Владелец: string = 'postgres') {
         this.Имя = Имя;
+        this.Синоним = Синоним;
         this._Схема = Схема;
         this._Владелец = Владелец;
         this.Колонки = [];

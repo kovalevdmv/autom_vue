@@ -1,33 +1,40 @@
 <template>
     <div style="display: flex; gap: 5px; width: 100%">
 
-        <div :class='button' v-if="props.ТаблицаВнешнегоКлюча" class="button" @click="ОбработчикНажатияПоКнопкеВыбора"
-            title='Выбрать из связанной таблицы'>...</div>
-        <div :class='button' v-if="props.ТаблицаВнешнегоКлюча" class="button" @click="ОбработчикНажатияПоКнопкеОткрытия"
-            title='Открыть значение в связанной таблице'>O</div>
+        <div :class='button' v-if="props.НастройкаПоля.ТаблицаВнешнегоКлюча" class="button"
+            @click="ОбработчикНажатияПоКнопкеВыбора" title='Выбрать из связанной таблицы'>...</div>
+        <div :class='button' v-if="props.НастройкаПоля.ТаблицаВнешнегоКлюча" class="button"
+            @click="ОбработчикНажатияПоКнопкеОткрытия" title='Открыть значение в связанной таблице'>O</div>
 
 
-        <input type="text" class="edit" :style="props.styleForInput" v-model="id" />
+        <input v-if="props.НастройкаПоля.Тип !== 'Дата'" type="text" class="edit" :style="props.НастройкаПоля.styleForInput"
+            v-model="id" />
+        <Calendar @date-select="ПриВыбореДаты" v-if="props.НастройкаПоля.Тип == 'Дата'" showButtonBar showIcon showTime
+            hourFormat="24" v-model="id" dateFormat="@" />
+
     </div>
 </template>
 
-
 <script setup lang="ts">
 
-import { inject } from 'vue';
+import { inject, ref } from 'vue';
 const СоздатьДиалоговоеОкно = inject('СоздатьДиалоговоеОкно');
 import type { ДиалоговоеОкно } from '@/interfaces/КонфигурацияИнтерфейса';
 import { ТипКомпонентаПредставления } from '@/interfaces/КонфигурацияИнтерфейса';
 const id = defineModel('id');
 const Данные = defineModel('Данные');
-const props = defineProps(['ТаблицаВнешнегоКлюча', 'ОбработчикПослеЗаполненияВнешнегоКлюча', 'styleForInput', 'attrForInput']);
+const props = defineProps(['НастройкаПоля']);
+
+function ПриВыбореДаты(значение) {
+    id.value = (new Date(значение)).toISOString(); // в формат ISO 8601 для вставки в PG
+}
 
 function ОбработчикНажатияПоКнопкеОткрытия() {
 
     const ДиалоговоеОкно: ДиалоговоеОкно = {
         id: Date.now(),
-        ДанныеСущности: {id: id.value},
-        КонфигурацияСущности: props.ТаблицаВнешнегоКлюча,
+        ДанныеСущности: { id: id.value },
+        КонфигурацияСущности: props.НастройкаПоля.ТаблицаВнешнегоКлюча,
         ТипКомпонентаПредставления: ТипКомпонентаПредставления.Элемент
     };
 
@@ -38,22 +45,22 @@ function ОбработчикНажатияПоКнопкеВыбора() {
     СоздатьДиалоговоеОкно(
         {
             id: Date.now(),
-            КонфигурацияСущности: props.ТаблицаВнешнегоКлюча,
+            КонфигурацияСущности: props.НастройкаПоля.ТаблицаВнешнегоКлюча,
             ТипКомпонентаПредставления: "ПредставлениеСписка",
             РежимВыбора: true,
             ОбработчикВыбораВнешнегоКлюча: (selRecord) => {
                 try {
                     id.value = selRecord.id;
                 } catch (error) {
-                    
+
                 }
-                props.ОбработчикПослеЗаполненияВнешнегоКлюча ? props.ОбработчикПослеЗаполненияВнешнегоКлюча(selRecord, Данные.value) : () => { }
+                props.НастройкаПоля.ОбработчикПослеЗаполненияВнешнегоКлюча ? props.НастройкаПоля.ОбработчикПослеЗаполненияВнешнегоКлюча(selRecord, Данные.value) : () => { }
             },
-            
+
         });
-    }
-    
-    
+}
+
+
 </script>
 
 <style scope>

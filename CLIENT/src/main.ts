@@ -60,5 +60,7 @@ import TabPanel from 'primevue/tabpanel';
 app.component('TabView', TabView);
 app.component('TabPanel', TabPanel);
 
+import Calendar from 'primevue/calendar';
+app.component('Calendar', Calendar);
 
 app.mount('#app')

@@ -12,10 +12,7 @@
             <template v-for="curFiled of props.ДиалоговоеОкно.КонфигурацияСущности.ПредставлениеЭлемента.НастройкаПолей"
                 :key="curFiled.Имя">
                 <div>{{ curFiled.Заголовок }}:</div>
-                <EnterField :styleForInput="curFiled.Стили ? curFiled.Стили : ''"
-                    :attrForInput="curFiled.Атрибуты ? curFiled.Атрибуты : ''" v-model:id=Данные[curFiled.Имя]
-                    :ТаблицаВнешнегоКлюча=curFiled.ТаблицаВнешнегоКлюча v-model:Данные=Данные
-                    :ОбработчикПослеЗаполненияВнешнегоКлюча=curFiled.ОбработчикПослеЗаполненияВнешнегоКлюча />
+                <EnterField v-model:id="Данные[curFiled.Имя]" v-model:Данные="Данные" :НастройкаПоля="curFiled" />
             </template>
         </div>
         <!-- --- -->
@@ -43,11 +40,9 @@
                         <tbody>
                             <tr v-for="(item, index) in Данные[curChiledTable.Таблица.Имя]" :key="item.name">
                                 <td v-for="curFiled of curChiledTable.ПредставлениеСписка.НастройкаПолей">
-                                    <EnterField :styleForInput="curFiled.Стили ? curFiled.Стили : ''"
-                                        :attrForInput="curFiled.Атрибуты ? curFiled.Атрибуты : {}"
-                                        v-model:id=item[curFiled.Имя] :ТаблицаВнешнегоКлюча=curFiled.ТаблицаВнешнегоКлюча
+                                    <EnterField v-model:id=item[curFiled.Имя]
                                         v-model:Данные=Данные[curChiledTable.Таблица.Имя][index]
-                                        :ОбработчикПослеЗаполненияВнешнегоКлюча=curFiled.ОбработчикПослеЗаполненияВнешнегоКлюча />
+                                        :НастройкаПоля="curFiled" />
                                 </td>
                             </tr>
                         </tbody>

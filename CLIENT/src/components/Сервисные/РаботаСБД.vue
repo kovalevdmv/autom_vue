@@ -32,17 +32,29 @@
                 </div>
             </TabPanel>
             <TabPanel header="Создать таблицы базы данных">
-                <div style="display: flex; gap: 10px; margin: 5px;">
-                    <v-btn @click="ВыбратьВсе">Выбрать все</v-btn>
-                    <v-btn @click="ОбновитьТаблицыВБД">Обновить таблицы в БД</v-btn>
-                    <v-btn @click="СоздатьЗапрос">Создать запрос</v-btn>
-                </div>
-                <div style="margin: 5px;">
-                    <div v-for="(el, index) of Данные.СписокТаблиц" :key="index">
-                        <input type="checkbox" v-model="el.checked">
-                        {{ el.table.Имя }}
+                <div style="user-select: none;">
+                    <div style="display: flex; gap: 10px; margin: 5px;">
+                        <v-btn @click="ВыбратьВсе">Выбрать все</v-btn>
+                        <v-btn @click="ОбновитьТаблицыВБД">Обновить таблицы в БД</v-btn>
+                        <v-btn @click="СоздатьЗапрос">Создать запрос</v-btn>
+                    </div>
+                    <div style="margin: 5px;">
+                        <div v-for="(el, index) of Данные.СписокТаблиц" :key="index">
+                            <input type="checkbox" v-model="el.checked" :id="el.table.Имя">
+                            <label :for="el.table.Имя" style="font-weight: bold;">
+                                {{ el.table.Синоним }}
+                            </label>
+                            {{ `(${el.table.Имя})` }}
+                        </div>
                     </div>
                 </div>
+            </TabPanel>
+            <TabPanel header="Создать таблицы базы данных">
+                <div style="border-style: 1px;">
+                    {{ Данные.ПолеДаты }}
+                </div>
+                <Calendar @date-select="dateSelect" showButtonBar showIcon showTime hourFormat="24"
+                    v-model="Данные.ПолеДаты" dateFormat="dd-mm-yy" />
             </TabPanel>
         </TabView>
 
@@ -56,6 +68,11 @@
 import { ref, inject, onMounted } from 'vue';
 import ОбщииФукнции from '@/ОбщииФукнции.ts';
 import ТаблицыБД from '@/Настройки/ТаблицыБазыДанных';
+
+function dateSelect(q) {
+    const dt = (new Date(q));
+    console.log(dt.getTime());
+}
 
 function ВыбратьВсе() {
     Данные.value.СписокТаблиц.forEach(_ => _.checked = true);
@@ -84,7 +101,8 @@ const Данные = ref(
         ПоказатьДиалогСОшибкой: false,
         ОшибкаЗапроса: '',
         ПоказыватьОшибкуВДиалоге: false,
-        СписокТаблиц: []
+        СписокТаблиц: [],
+        ПолеДаты: 0
     }
 );
 
