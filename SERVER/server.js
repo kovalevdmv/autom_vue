@@ -1,12 +1,7 @@
-import { sequelize } from './sequelize-config.js';
-import {Nomenclature} from './models/Nomenclature.js';
 import { rpcMethods } from './rpc.js';
 
-sequelize.sync().then(() => {
-    console.log('Tables have been created');
-}).catch((error) => {
-    console.error('Unable to create tables', error);
-});
+import Piscina from 'piscina';
+const piscina = new Piscina({ filename: './worker.js' });
 
 import express from 'express';
 const app = express();
@@ -18,11 +13,6 @@ app.use(cors());
 
 app.use(express.json()); // Для разбора JSON-тел запросов
 
-// Получение всех элементов
-app.get('/api/items', (req, res) => {
-    Nomenclature.findAll().then(items => res.json(items));
-});
-
 // вызор на клиенте
 //{
 //    "MethodName": "Module1.Method1",
@@ -33,13 +23,19 @@ app.post('/api/rpc', (req, res) => {
     const [ModuleName, Method] = MethodName.split('.');
     if (rpcMethods[ModuleName] && rpcMethods[ModuleName][Method]) {
         try {
-            rpcMethods[ModuleName][Method](res, Parameters);
+            rpcMethods[ModuleName][Method](res, Parameters, piscina);
         } catch (error) {
             res.status(200).json({ status: 'error', message: error });
         }
     } else {
         res.status(200).json({ status: 'error', message: `Method not found ${MethodName}` });
     }
+});
+
+/*
+// Получение всех элементов
+app.get('/api/items', (req, res) => {
+    Nomenclature.findAll().then(items => res.json(items));
 });
 
 // Добавление нового элемента
@@ -51,6 +47,7 @@ app.post('/api/items', (req, res) => {
         res.status(500).send('Internal Server Error');
     });
 });
+
 
 app.put('/api/items/:id', (req, res) => {
     const id = req.params.id;
@@ -96,5 +93,6 @@ app.get('/api/items/:id', (req, res) => {
 });
 
 // Другие маршруты для обновления и удаления...
+*/
 
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));

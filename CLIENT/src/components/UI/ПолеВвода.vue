@@ -1,12 +1,9 @@
 <template>
     <div style="display: flex; gap: 5px; width: 100%">
-
         <div :class='button' v-if="props.НастройкаПоля.ТаблицаВнешнегоКлюча" class="button"
             @click="ОбработчикНажатияПоКнопкеВыбора" title='Выбрать из связанной таблицы'>...</div>
         <div :class='button' v-if="props.НастройкаПоля.ТаблицаВнешнегоКлюча" class="button"
             @click="ОбработчикНажатияПоКнопкеОткрытия" title='Открыть значение в связанной таблице'>O</div>
-
-
         <input
             @keydown.enter="ОбработкаЗавершенияРедактированияЭлемента"
             @blur="ОбработкаЗавершенияРедактированияЭлемента"
@@ -14,8 +11,6 @@
             v-model="id" />
         <Calendar class="edit" @date-select="ПриВыбореДаты" v-if="props.НастройкаПоля.Тип == 'Дата'" showButtonBar showIcon
             showTime hourFormat="24" v-model="id" dateFormat="@" />
-
-
     </div>
 </template>
 
@@ -92,6 +87,8 @@ function ОбработчикНажатияПоКнопкеВыбора() {
     user-select: none;
     box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
     border-radius: 5px;
+    display:flex;
+    align-items: center;
 }
 
 .button:hover {

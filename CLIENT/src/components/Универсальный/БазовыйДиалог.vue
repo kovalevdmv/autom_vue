@@ -9,6 +9,10 @@
         <v-divider vertical></v-divider>
         <v-btn @click="Удалить">Удалить</v-btn>
         -->
+        <v-divider vertical></v-divider>
+        <v-divider vertical></v-divider>
+        <v-divider vertical></v-divider>
+        <v-btn v-for="action of props.ДиалоговоеОкно.КонфигурацияСущности.ПредставлениеЭлемента.ДопДействия" @click="action.Обработчик(Данные)">{{ action.Заголовок }}</v-btn>
     </div>
 </template>
 

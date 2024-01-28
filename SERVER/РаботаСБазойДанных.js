@@ -12,7 +12,7 @@ const pool = new Pool({
 });
 
 // Функция для выполнения запроса с параметрами
-const queryDatabase = async (text, params) => {
+const ВыполнитьЗапрос = async (text, params) => {
     const client = await pool.connect();
     try {
         const res = await client.query(text, params);
@@ -23,16 +23,16 @@ const queryDatabase = async (text, params) => {
 };
 
 // RPC функция для выполнения запроса
-async function ВыполнитьЗапросRPC(respons, Параметры) {
+async function ВыполнитьЗапросRPC(respons, Параметры, piscina) {
     try {
         console.log(Параметры);
-        const res = await queryDatabase(Параметры.ТекстЗапроса, Параметры.Параметры, respons);
+        const res = await ВыполнитьЗапрос(Параметры.ТекстЗапроса, Параметры.Параметры, respons);
         respons.status(200).json(res);
     } catch (err) {
         console.error(err);
-        const errorText = {Сообщение: err.message, ТекстЗапроса: Параметры.ТекстЗапроса, Параметры: Параметры.Параметры}
+        const errorText = { Сообщение: err.message, ТекстЗапроса: Параметры.ТекстЗапроса, Параметры: Параметры.Параметры }
         respons.status(200).json({ status: 'error', message: errorText });
     }
 }
 
-export default { ВыполнитьЗапросRPC };
+export default { ВыполнитьЗапросRPC, ВыполнитьЗапрос };
