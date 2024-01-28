@@ -12,7 +12,7 @@
         <v-divider vertical></v-divider>
         <v-divider vertical></v-divider>
         <v-divider vertical></v-divider>
-        <v-btn v-for="action of props.ДиалоговоеОкно.КонфигурацияСущности.ПредставлениеЭлемента.ДопДействия" @click="action.Обработчик(Данные)">{{ action.Заголовок }}</v-btn>
+        <v-btn v-for="action of props.ДиалоговоеОкно.КонфигурацияСущности.ПредставлениеЭлемента.ДопДействия" @click="ОбработчикДопДействия(action)">{{ action.Заголовок }}</v-btn>
     </div>
 </template>
 
@@ -25,9 +25,13 @@ import type { ДанныеСущности } from '@/interfaces/Конфигур
 const { props } = defineProps(['props']);
 const toast = inject('toast');
 const ЗакрытьДиалоговоеОкно = inject('ЗакрытьДиалоговоеОкно');
+const СоздатьДиалоговоеОкно = inject('СоздатьДиалоговоеОкно');
 const Данные = defineModel<ДанныеСущности>('Данные');
 const emit = defineEmits(['СобытиеПослеЗаполненияМоделиОбъекта', 'СобытиеПередЗакрытиемДиалога']);
 
+function ОбработчикДопДействия(action){
+    action.Обработчик(this, Данные.value);
+}
 
 function Закрыть() {
     const ПараметрыСобытия = { Прервать: false };

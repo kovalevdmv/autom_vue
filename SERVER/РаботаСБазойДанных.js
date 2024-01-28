@@ -11,6 +11,10 @@ const pool = new Pool({
     port: 5432,
 });
 
+async function УдалитьЗаписиВАгрегирующихТаблицахПоИДРегистратора(КлиентДБ, ИмяАгрегирующейТаблицы, ИДРегистратора, ТипРегистратор){
+    await КлиентДБ.query(`DELETE FROM ${ИмяАгрегирующейТаблицы} AS T WHERE T.registrator_id = $1 AND registrator_type=$2`, [ИДРегистратора,ТипРегистратор]);
+}
+
 // Функция для выполнения запроса с параметрами
 const ВыполнитьЗапрос = async (text, params) => {
     const client = await pool.connect();
@@ -21,6 +25,31 @@ const ВыполнитьЗапрос = async (text, params) => {
         client.release();
     }
 };
+
+async function НачатьТранзакцию() {
+    const client = await pool.connect();
+    await client.query('BEGIN;');
+    return client;
+}
+
+async function ВыполнитьЗапросВТранзакции(client, text, params) {
+    const res = await client.query(text, params);
+    return res.rows;
+}
+
+async function ЗафиксироватьТранзакцию(client, ВернутьКлиентВПул = true) {
+    await client.query('COMMIT;');
+    if (ВернутьКлиентВПул)
+        client.release();
+    return client;
+}
+
+async function ОтменитьТранзакцию(client, ВернутьКлиентВПул = true) {
+    await client.query('ROLLBACK;');
+    if (ВернутьКлиентВПул)
+        client.release();
+    return client;
+}
 
 // RPC функция для выполнения запроса
 async function ВыполнитьЗапросRPC(respons, Параметры, piscina) {
@@ -35,4 +64,12 @@ async function ВыполнитьЗапросRPC(respons, Параметры, pi
     }
 }
 
-export default { ВыполнитьЗапросRPC, ВыполнитьЗапрос };
+export default {
+    ВыполнитьЗапросRPC,
+    ВыполнитьЗапрос,
+    НачатьТранзакцию,
+    ВыполнитьЗапросВТранзакции,
+    ЗафиксироватьТранзакцию,
+    ОтменитьТранзакцию,
+    УдалитьЗаписиВАгрегирующихТаблицахПоИДРегистратора
+};
