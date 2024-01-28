@@ -37,11 +37,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(item, index) in Данные[curChiledTable.Таблица.Имя]" :key="item.name">
-                                <td v-for="curFiled of curChiledTable.ПредставлениеСписка.НастройкаПолей">
-                                    <EnterField v-model:id=item[curFiled.Имя]
-                                        v-model:Данные=Данные[curChiledTable.Таблица.Имя][index]
-                                        :НастройкаПоля="curFiled" />
+                            <tr v-for="(item, row) in Данные[curChiledTable.Таблица.Имя]" :key="item.name">
+                                <td v-for="(curFiled, col) of curChiledTable.ПредставлениеСписка.НастройкаПолей">
+                                    <div style="display: flex; ">
+                                        <button @click="УдалитьСтроку(curChiledTable.Таблица.Имя, row)" style="width: 20px; display: flex; background-color: rgba(220, 20, 60, 0.54);" v-if="col == 0">X</button>
+                                        <EnterField v-model:id=item[curFiled.Имя]
+                                            v-model:Данные=Данные[curChiledTable.Таблица.Имя][row]
+                                            :НастройкаПоля="curFiled" />
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -66,6 +69,10 @@ import BaseDialog from '@/components/Универсальный/БазовыйД
 
 const Данные = ref({ id: 0 });
 const ПоляШапки = ref([]);
+
+function УдалитьСтроку(ИмяТаблицы, НомерСтроки){
+    Данные.value[ИмяТаблицы] = Данные.value[ИмяТаблицы].filter((el,index) => index !== НомерСтроки);
+}
 
 function СобытиеПередЗакрытиемДиалога(ПараметрыСобытия) {
     //ПараметрыСобытия.Прервать = false;
